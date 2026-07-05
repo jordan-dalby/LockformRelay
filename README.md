@@ -22,6 +22,7 @@ Lockform never sees your key, and never sees your integration credentials.
 | **Slack** | Posts a message to a channel via an incoming webhook. |
 | **Discord** | Posts a message to a channel via a webhook. |
 | **Email** | Emails each submission via Resend or your own SMTP server. |
+| **Zapier** | POSTs each submission (as JSON) to a Zapier Catch Hook to trigger any Zap. |
 
 To POST the raw encrypted submission to an arbitrary URL (and decrypt it
 yourself with the `lockform` SDK), use Lockform's built-in **Direct webhook**
@@ -161,5 +162,5 @@ Browser ──────────────────────▶ Lo
                                     │                                                   │  decrypts with YOUR key
                                     │ stores only ciphertext                            │  fans out
                                     ▼                                                   ▼
-                                (never has your key)                    Slack · Discord · Email · any URL
+                                (never has your key)                    Slack · Discord · Email · Zapier · any URL
 ```

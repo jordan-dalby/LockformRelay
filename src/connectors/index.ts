@@ -2,11 +2,13 @@ import type { Connector, DispatchSubmission } from './types.js';
 import { slack } from './slack.js';
 import { discord } from './discord.js';
 import { email } from './email.js';
+import { zapier } from './zapier.js';
 
 export const REGISTRY: Record<string, Connector> = {
   slack,
   discord,
   email,
+  zapier,
 };
 
 export interface DispatchResult {

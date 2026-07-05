@@ -99,6 +99,23 @@ export const CONNECTORS: ConnectorDef[] = [
       },
     ],
   },
+  {
+    key: 'zapier',
+    label: 'Zapier',
+    description:
+      'POST each submission to a Zapier Catch Hook to trigger any Zap.',
+    fields: [
+      {
+        key: 'hook_url',
+        label: 'Catch Hook URL',
+        type: 'url',
+        secret: true,
+        required: true,
+        placeholder: 'https://hooks.zapier.com/hooks/catch/...',
+        help: 'Create a "Webhooks by Zapier → Catch Hook" trigger and paste its URL.',
+      },
+    ],
+  },
 ];
 
 const BY_KEY = new Map(CONNECTORS.map((c) => [c.key, c]));

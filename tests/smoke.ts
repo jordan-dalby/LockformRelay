@@ -82,7 +82,7 @@ let token = '';
 {
   const r = await req('/admin/schema', { headers: { Authorization: `Bearer ${token}` } });
   const b = await r.json();
-  check('schema -> 3 connectors', r.status === 200 && b.connectors.length === 3, b);
+  check('schema -> 4 connectors', r.status === 200 && b.connectors.length === 4, b);
 }
 
 // verify webhook secret
