@@ -39,6 +39,16 @@ const json = (token: string, body: unknown, method = 'PUT'): RequestInit => ({
   check('GET /health -> ok', r.status === 200 && b.status === 'ok', b);
 }
 
+// CORS: only configured origins allowed; everything else (incl. localhost) denied
+{
+  const conf = await app.fetch(new Request(base + '/health', { headers: { Origin: 'https://app.lockform.io' } }));
+  check('CORS allows configured origin', conf.headers.get('access-control-allow-origin') === 'https://app.lockform.io');
+  const local = await app.fetch(new Request(base + '/health', { headers: { Origin: 'http://localhost:5173' } }));
+  check('CORS denies unconfigured localhost origin', !local.headers.get('access-control-allow-origin'), local.headers.get('access-control-allow-origin'));
+  const evil = await app.fetch(new Request(base + '/health', { headers: { Origin: 'https://evil.example.com' } }));
+  check('CORS denies random origin', !evil.headers.get('access-control-allow-origin'), evil.headers.get('access-control-allow-origin'));
+}
+
 // auth wrong
 {
   const r = await req('/admin/auth', {
@@ -85,6 +95,19 @@ let token = '';
   check('verify wrong webhook secret -> matches false', bad.status === 200 && bb.matches === false, bb);
   const noauth = await req('/admin/verify-webhook-secret', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secret: 'x' }) });
   check('verify without token -> 401', noauth.status === 401);
+}
+
+// two-step: save a secret field, then enable later with empty fields (server retains it)
+{
+  const r1 = await req('/admin/config/form2/forward', json(token, { fields: { url: 'https://hooks.example.com/x' } }));
+  check('save forward url (no enable) -> 200', r1.status === 200);
+  const r2 = await req('/admin/config/form2', { headers: { Authorization: `Bearer ${token}` } });
+  const b2 = await r2.json();
+  check('forward url isSet after save', b2.connectors.forward?.fields?.url?.isSet === true, b2.connectors.forward);
+  check('forward complete after save', b2.connectors.forward?.complete === true, b2.connectors.forward);
+  const r3 = await req('/admin/config/form2/forward', json(token, { fields: {}, enabled: true }));
+  const b3 = await r3.json();
+  check('enable forward with empty fields (server retains url) -> 200 enabled', r3.status === 200 && b3.connector.enabled === true, b3);
 }
 
 // set slack (complete) + enable
