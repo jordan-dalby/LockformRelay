@@ -30,17 +30,22 @@ at rest); Lockform only ever sends it, never reads it back.
 
 ## Deploy to Railway (recommended)
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/AEjS77?referralCode=uc_lax&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
-1. Click **Deploy on Railway** and let it create the project from this repo.
-2. **Add a Volume** to the service and set its mount path to `/data` (Railway →
-   your service → *Variables/Settings* → *Volumes*). This is where your config is
-   stored so it survives redeploys.
-3. Set the environment variables below.
-4. Once deployed, copy the service's public URL. In Lockform, go to a form →
-   **Integrations** → **Connect a relay**, paste the URL, the webhook secret, and
-   the admin password. Lockform will verify the connection and you're ready to
-   turn on integrations.
+The template provisions the service, a `/data` volume, and a public domain for you.
+
+1. Click **Deploy on Railway**.
+2. Fill in the three required variables when prompted: `LOCKFORM_PRIVATE_KEYS`,
+   `WEBHOOK_SECRET`, `ADMIN_PASSWORD`. (`DB_PATH` is preset to `/data/relay.sqlite`
+   for the volume.)
+3. When it finishes, copy the service's public URL.
+4. In Lockform, go to a form → **Integrations** → **Connect a relay**, paste the
+   URL, the webhook secret, and the admin password. Lockform verifies the relay is
+   reachable *and* that the webhook secret matches before enabling anything.
+
+The image is a multi-stage Docker build on Node 22, so the native `better-sqlite3`
+dependency uses a prebuilt binary (no compile step) and your secrets are never
+baked into build layers.
 
 ## Environment variables
 
@@ -103,11 +108,35 @@ email connector, it has no effect on you.
 | `POST` | `/webhook` | HMAC signature | Receives submissions from Lockform. This is the URL you give Lockform. |
 | `GET` | `/health` | none | Connection check. |
 | `POST` | `/admin/auth` | password | Exchanges `ADMIN_PASSWORD` for a short-lived session token. |
+| `POST` | `/admin/verify-webhook-secret` | token | Confirms a given secret matches `WEBHOOK_SECRET` (no value returned). |
 | `GET` | `/admin/schema` | token | Connector field definitions. |
 | `GET` | `/admin/config[/:formId]` | token | Current config (structure only - no secret values). |
 | `PUT` | `/admin/config/:formId/:connector` | token | Set fields / enable a connector. |
 | `DELETE` | `/admin/config/:formId[/:connector]` | token | Remove a connector or all config for a form. |
 | `POST` | `/admin/test/:formId/:connector` | token | Send a sample event through a connector. |
+
+## Container image
+
+Every push to `main` (and every `v*` tag) runs the tests, then builds and
+publishes a multi-arch-ready image to GitHub Container Registry:
+
+```
+ghcr.io/jordan-dalby/lockformrelay:latest
+```
+
+Tags: `latest` (main), `sha-<commit>`, and semver (`1.2.3`, `1.2`) on release tags.
+
+```bash
+docker run -p 8080:8080 \
+  -e LOCKFORM_PRIVATE_KEYS=... -e WEBHOOK_SECRET=... -e ADMIN_PASSWORD=... \
+  -e DB_PATH=/data/relay.sqlite -v lockform-relay-data:/data \
+  ghcr.io/jordan-dalby/lockformrelay:latest
+```
+
+> The GHCR package is private by default. To deploy it from Railway (or anywhere)
+> by image reference rather than building from source, either make the package
+> public (repo → Packages → package → *Package settings* → *Change visibility*) or
+> give the host registry credentials.
 
 ## Run locally
 

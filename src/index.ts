@@ -18,7 +18,7 @@ if (store.passwordChanged) {
 const auth = new AdminAuth(env.adminPassword);
 const app = createApp({ env, store, auth });
 
-serve({ fetch: app.fetch, port: env.port }, (info) => {
+serve({ fetch: app.fetch, port: env.port, hostname: '0.0.0.0' }, (info) => {
   console.log(
     `[lockform-relay] listening on :${info.port} ` +
       `(keys: ${env.privateKeys.length}, origins: ${env.allowedOrigins.join(', ')})`

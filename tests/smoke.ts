@@ -75,6 +75,18 @@ let token = '';
   check('schema -> 4 connectors', r.status === 200 && b.connectors.length === 4, b);
 }
 
+// verify webhook secret
+{
+  const good = await req('/admin/verify-webhook-secret', json(token, { secret: 'test-webhook-secret' }, 'POST'));
+  const bg = await good.json();
+  check('verify correct webhook secret -> matches true', good.status === 200 && bg.matches === true, bg);
+  const bad = await req('/admin/verify-webhook-secret', json(token, { secret: 'nope' }, 'POST'));
+  const bb = await bad.json();
+  check('verify wrong webhook secret -> matches false', bad.status === 200 && bb.matches === false, bb);
+  const noauth = await req('/admin/verify-webhook-secret', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secret: 'x' }) });
+  check('verify without token -> 401', noauth.status === 401);
+}
+
 // set slack (complete) + enable
 {
   const r = await req(

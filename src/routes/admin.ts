@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { Deps } from '../app.js';
 import { bearerToken } from '../auth.js';
+import { constantTimeEquals } from '../secretbox.js';
 import { dispatch, type DispatchSubmission } from '../connectors/index.js';
 import {
   CONNECTORS,
@@ -51,6 +52,22 @@ export function adminRouter(deps: Deps): Hono {
       return c.json({ error: 'Unauthorized' }, 401);
     }
     return next();
+  });
+
+  // Lets the connect flow confirm the webhook secret matches this relay's, so a
+  // mismatch is caught up front instead of silently dropping every submission.
+  // Safe to expose: the caller already holds a valid admin session.
+  app.post('/verify-webhook-secret', async (c) => {
+    let body: { secret?: unknown };
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+    if (typeof body.secret !== 'string') {
+      return c.json({ error: 'Missing secret' }, 400);
+    }
+    return c.json({ matches: constantTimeEquals(body.secret, deps.env.webhookSecret) });
   });
 
   // Connector field definitions so the UI renders the same fields the relay knows.
