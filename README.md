@@ -3,14 +3,14 @@
 Your own integrations backend for [Lockform](https://lockform.io). Lockform is
 zero-knowledge: its servers never hold your decryption key, so they can never
 read your submissions. That is also why Lockform can't push your data straight
-into Slack, a spreadsheet, or your CRM — it doesn't have the plaintext.
+into Slack, a spreadsheet, or your CRM - it doesn't have the plaintext.
 
 The relay closes that gap **without giving Lockform your key**. You deploy this
 small service to your own hosting (Railway in one click). It:
 
 1. Receives the encrypted submission from Lockform (verified by a shared secret).
 2. Decrypts it with **your** private key, which lives only in this service's
-   environment — never in Lockform.
+   environment - never in Lockform.
 3. Fans it out to the integrations you configure.
 
 Lockform never sees your key, and never sees your integration credentials.
@@ -19,12 +19,12 @@ Lockform never sees your key, and never sees your integration credentials.
 
 | Connector | What it does |
 |-----------|--------------|
-| **Forward (Webhook)** | POSTs the decrypted submission as JSON to any URL — Zapier, Make, n8n, or your own endpoint. This is the escape hatch for connecting anything. |
+| **Forward (Webhook)** | POSTs the decrypted submission as JSON to any URL - Zapier, Make, n8n, or your own endpoint. This is the escape hatch for connecting anything. |
 | **Slack** | Posts a message to a channel via an incoming webhook. |
 | **Discord** | Posts a message to a channel via a webhook. |
 | **Email** | Emails each submission via Resend or your own SMTP server. |
 
-You configure these from inside Lockform — you never edit code or environment
+You configure these from inside Lockform - you never edit code or environment
 variables to add an integration. The relay stores that config itself (encrypted
 at rest); Lockform only ever sends it, never reads it back.
 
@@ -49,9 +49,9 @@ at rest); Lockform only ever sends it, never reads it back.
 | `LOCKFORM_PRIVATE_KEYS` | ✅ | Your base64 private key(s), comma-separated. See below. |
 | `WEBHOOK_SECRET` | ✅ | Random string. Paste the **same** value into Lockform. Used to verify webhooks are genuine. |
 | `ADMIN_PASSWORD` | ✅ | Protects the config API and encrypts your integration secrets at rest. Min 12 chars. |
-| `ALLOWED_ORIGINS` | — | Browser origins allowed to configure the relay. Defaults to `https://app.lockform.io`. |
-| `DB_PATH` | — | SQLite path. Set to `/data/relay.sqlite` when using a Railway Volume. Defaults to `./data/relay.sqlite`. |
-| `PORT` | — | Railway sets this automatically. |
+| `ALLOWED_ORIGINS` | - | Browser origins allowed to configure the relay. Defaults to `https://app.lockform.io`. |
+| `DB_PATH` | - | SQLite path. Set to `/data/relay.sqlite` when using a Railway Volume. Defaults to `./data/relay.sqlite`. |
+| `PORT` | - | Railway sets this automatically. |
 
 ### Getting your private key
 
@@ -64,7 +64,7 @@ npx lockform-derive-key
 ```
 
 Paste your 15 words when prompted; it prints the base64 key. If you have rotated
-keys, provide all of them comma-separated — the relay tries each until one
+keys, provide all of them comma-separated - the relay tries each until one
 decrypts the submission.
 
 ## Security model
@@ -78,7 +78,7 @@ decrypts the submission.
 - **Secrets are encrypted at rest.** Every stored value is AES-256-GCM encrypted
   with a key derived from `ADMIN_PASSWORD` plus a per-install random salt, so a
   leaked database file alone is not a leak of your credentials.
-  *Changing `ADMIN_PASSWORD` makes previously stored secrets unreadable — you'll
+  *Changing `ADMIN_PASSWORD` makes previously stored secrets unreadable - you'll
   need to re-enter them.*
 - **Lockform can't redirect your data.** Because routing/destination config lives
   here (not in Lockform's backend), Lockform cannot point your forwarded plaintext
@@ -104,7 +104,7 @@ email connector, it has no effect on you.
 | `GET` | `/health` | none | Connection check. |
 | `POST` | `/admin/auth` | password | Exchanges `ADMIN_PASSWORD` for a short-lived session token. |
 | `GET` | `/admin/schema` | token | Connector field definitions. |
-| `GET` | `/admin/config[/:formId]` | token | Current config (structure only — no secret values). |
+| `GET` | `/admin/config[/:formId]` | token | Current config (structure only - no secret values). |
 | `PUT` | `/admin/config/:formId/:connector` | token | Set fields / enable a connector. |
 | `DELETE` | `/admin/config/:formId[/:connector]` | token | Remove a connector or all config for a form. |
 | `POST` | `/admin/test/:formId/:connector` | token | Send a sample event through a connector. |
