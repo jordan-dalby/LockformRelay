@@ -35,7 +35,7 @@ const check = (name: string, cond: boolean, extra?: unknown) => {
   if (!cond) failures++;
 };
 
-// 2. Capture server standing in for the user's "forward" destination.
+// 2. Capture server standing in for the user's Slack incoming webhook.
 let captured: any = null;
 const capture = createServer((req, res) => {
   let body = '';
@@ -49,8 +49,8 @@ await new Promise<void>((r) => capture.listen(0, r));
 const capturePort = (capture.address() as any).port;
 const captureUrl = `http://127.0.0.1:${capturePort}/hook`;
 
-// 3. Configure the forward connector (directly through the store).
-store.setConnector('form-e2e', 'forward', { url: captureUrl }, true);
+// 3. Configure the slack connector to post to our capture server.
+store.setConnector('form-e2e', 'slack', { webhook_url: captureUrl }, true);
 
 // 4. Encrypt a submission exactly as Lockform's client does.
 const formId = 'form-e2e';
@@ -90,7 +90,7 @@ const signature = createHmac('sha256', env.webhookSecret).update(rawBody).digest
   check('bad signature -> 401', r.status === 401);
 }
 
-// 7. Valid signature -> decrypt -> forward.
+// 7. Valid signature -> decrypt -> slack.
 {
   const r = await app.fetch(
     new Request('http://relay.test/webhook', {
@@ -100,10 +100,11 @@ const signature = createHmac('sha256', env.webhookSecret).update(rawBody).digest
     })
   );
   const b = await r.json();
+  const text = typeof captured?.text === 'string' ? captured.text : '';
   check('valid webhook -> 200 processed 1', r.status === 200 && b.processed === 1, b);
-  check('forward received mapped data', captured?.data?.name === 'Alice' && captured?.data?.email === 'alice@example.com', captured?.data);
-  check('forward received raw data', captured?.raw?.['field-1'] === 'Alice', captured?.raw);
-  check('form_id propagated', captured?.form_id === formId, captured?.form_id);
+  check('slack received decrypted name', text.includes('Alice'), text);
+  check('slack received decrypted email', text.includes('alice@example.com'), text);
+  check('form_id propagated', text.includes(formId), text);
 }
 
 capture.close();

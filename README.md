@@ -19,10 +19,13 @@ Lockform never sees your key, and never sees your integration credentials.
 
 | Connector | What it does |
 |-----------|--------------|
-| **Forward (Webhook)** | POSTs the decrypted submission as JSON to any URL - Zapier, Make, n8n, or your own endpoint. This is the escape hatch for connecting anything. |
 | **Slack** | Posts a message to a channel via an incoming webhook. |
 | **Discord** | Posts a message to a channel via a webhook. |
 | **Email** | Emails each submission via Resend or your own SMTP server. |
+
+To POST the raw encrypted submission to an arbitrary URL (and decrypt it
+yourself with the `lockform` SDK), use Lockform's built-in **Direct webhook**
+instead - it needs no relay.
 
 You configure these from inside Lockform - you never edit code or environment
 variables to add an integration. The relay stores that config itself (encrypted

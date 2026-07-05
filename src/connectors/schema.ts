@@ -21,23 +21,6 @@ export interface ConnectorDef {
 
 export const CONNECTORS: ConnectorDef[] = [
   {
-    key: 'forward',
-    label: 'Forward (Webhook)',
-    description:
-      'POST the decrypted submission as JSON to any URL. Use it to connect Zapier, Make, n8n, or your own endpoint.',
-    fields: [
-      {
-        key: 'url',
-        label: 'Destination URL',
-        type: 'url',
-        secret: true,
-        required: true,
-        placeholder: 'https://hooks.zapier.com/hooks/catch/...',
-        help: 'The decrypted submission is POSTed here as JSON.',
-      },
-    ],
-  },
-  {
     key: 'slack',
     label: 'Slack',
     description: 'Post a message to a Slack channel via an incoming webhook.',

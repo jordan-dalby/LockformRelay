@@ -1,11 +1,9 @@
 import type { Connector, DispatchSubmission } from './types.js';
-import { forward } from './forward.js';
 import { slack } from './slack.js';
 import { discord } from './discord.js';
 import { email } from './email.js';
 
 export const REGISTRY: Record<string, Connector> = {
-  forward,
   slack,
   discord,
   email,

@@ -82,7 +82,7 @@ let token = '';
 {
   const r = await req('/admin/schema', { headers: { Authorization: `Bearer ${token}` } });
   const b = await r.json();
-  check('schema -> 4 connectors', r.status === 200 && b.connectors.length === 4, b);
+  check('schema -> 3 connectors', r.status === 200 && b.connectors.length === 3, b);
 }
 
 // verify webhook secret
@@ -99,15 +99,15 @@ let token = '';
 
 // two-step: save a secret field, then enable later with empty fields (server retains it)
 {
-  const r1 = await req('/admin/config/form2/forward', json(token, { fields: { url: 'https://hooks.example.com/x' } }));
-  check('save forward url (no enable) -> 200', r1.status === 200);
+  const r1 = await req('/admin/config/form2/slack', json(token, { fields: { webhook_url: 'https://hooks.slack.com/services/AAA' } }));
+  check('save slack url (no enable) -> 200', r1.status === 200);
   const r2 = await req('/admin/config/form2', { headers: { Authorization: `Bearer ${token}` } });
   const b2 = await r2.json();
-  check('forward url isSet after save', b2.connectors.forward?.fields?.url?.isSet === true, b2.connectors.forward);
-  check('forward complete after save', b2.connectors.forward?.complete === true, b2.connectors.forward);
-  const r3 = await req('/admin/config/form2/forward', json(token, { fields: {}, enabled: true }));
+  check('slack url isSet after save', b2.connectors.slack?.fields?.webhook_url?.isSet === true, b2.connectors.slack);
+  check('slack complete after save', b2.connectors.slack?.complete === true, b2.connectors.slack);
+  const r3 = await req('/admin/config/form2/slack', json(token, { fields: {}, enabled: true }));
   const b3 = await r3.json();
-  check('enable forward with empty fields (server retains url) -> 200 enabled', r3.status === 200 && b3.connector.enabled === true, b3);
+  check('enable slack with empty fields (server retains url) -> 200 enabled', r3.status === 200 && b3.connector.enabled === true, b3);
 }
 
 // set slack (complete) + enable
@@ -129,11 +129,11 @@ let token = '';
   check('slack webhook_url value NOT returned (write-only)', !('value' in field), field);
 }
 
-// try enabling forward with no url -> 400 incomplete
+// try enabling discord with no url -> 400 incomplete
 {
-  const r = await req('/admin/config/form1/forward', json(token, { enabled: true }));
+  const r = await req('/admin/config/form1/discord', json(token, { enabled: true }));
   const b = await r.json();
-  check('enable forward without url -> 400 incomplete', r.status === 400 && Array.isArray(b.missing), b);
+  check('enable discord without url -> 400 incomplete', r.status === 400 && Array.isArray(b.missing), b);
 }
 
 // email: non-secret fields ARE returned, secret provider-conditional enforced
