@@ -116,6 +116,23 @@ export const CONNECTORS: ConnectorDef[] = [
       },
     ],
   },
+  {
+    key: 'n8n',
+    label: 'n8n',
+    description:
+      'POST each submission to an n8n Webhook node to trigger any workflow.',
+    fields: [
+      {
+        key: 'webhook_url',
+        label: 'Webhook URL',
+        type: 'url',
+        secret: true,
+        required: true,
+        placeholder: 'https://your-n8n.example.com/webhook/...',
+        help: 'Add a Webhook node (HTTP method POST) and paste its Production URL.',
+      },
+    ],
+  },
 ];
 
 const BY_KEY = new Map(CONNECTORS.map((c) => [c.key, c]));

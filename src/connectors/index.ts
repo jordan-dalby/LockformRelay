@@ -3,12 +3,14 @@ import { slack } from './slack.js';
 import { discord } from './discord.js';
 import { email } from './email.js';
 import { zapier } from './zapier.js';
+import { n8n } from './n8n.js';
 
 export const REGISTRY: Record<string, Connector> = {
   slack,
   discord,
   email,
   zapier,
+  n8n,
 };
 
 export interface DispatchResult {
