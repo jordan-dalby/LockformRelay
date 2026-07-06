@@ -17,7 +17,7 @@ Paste your 15 words when prompted; it prints the key. If you've rotated keys, ke
 
 ## Deploy to Railway
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/AEjS77?referralCode=uc_lax&utm_medium=integration&utm_source=template&utm_campaign=generic)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/lockform-relay)
 
 1. Click **Deploy on Railway**.
 2. Fill in the required variables:
